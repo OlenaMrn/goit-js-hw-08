@@ -1,4 +1,5 @@
 import VimeoPlayer from '@vimeo/player';
+import throttle from 'lodash.throttle';
 
 const iframe = document.querySelector('iframe');
 const player = new VimeoPlayer(iframe);
@@ -11,9 +12,12 @@ const player = new VimeoPlayer(iframe);
 //   console.log('title:', title);
 // });
 
-player.on('timeupdate', ({ seconds }) => {
+const onTimeUpdate = throttle(({ seconds }) => {
+//   console.log(seconds);
   localStorage.setItem('videoplayer-current-time', seconds);
-});
+}, 1000); // затримка виклику функції - 1000 мілісекунд
+
+player.on('timeupdate', onTimeUpdate);
 
 const startTime = localStorage.getItem('videoplayer-current-time');
 
@@ -25,11 +29,13 @@ player
   .catch(function (error) {
     switch (error.name) {
       case 'RangeError':
-        // the time was less than 0 or greater than the video’s duration
+        console.log(
+          'The time was less than 0 or greater than the video’s duration.'
+        );
         break;
 
       default:
-        // some other error occurred
+        console.log('An error occurred');
         break;
     }
   });
